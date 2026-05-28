@@ -13,8 +13,8 @@ interface LetterViewerProps {
   playHover: () => void;
 }
 
-// Subcomponent: Auto-typing text for Letter 7
-function Typist({ paragraphs }: { paragraphs: string[] }) {
+// Subcomponent: Auto-typing text for all letters
+function Typist({ paragraphs, styleType }: { paragraphs: string[]; styleType: string }) {
   const [displayText, setDisplayText] = useState<string[]>([]);
   const [currentParagraphIdx, setCurrentParagraphIdx] = useState(0);
   const [currentCharIdx, setCurrentCharIdx] = useState(0);
@@ -46,10 +46,15 @@ function Typist({ paragraphs }: { paragraphs: string[] }) {
   return (
     <div className="flex flex-col gap-4 text-left">
       {displayText.map((text, idx) => (
-        <p key={idx} className="text-base md:text-lg leading-relaxed text-slate-700 font-medium">
+        <p
+          key={idx}
+          className={`text-base md:text-lg leading-relaxed font-medium ${
+            styleType === "luxury" ? "text-pink-100/90" : "text-slate-700"
+          }`}
+        >
           {text}
           {idx === currentParagraphIdx && currentCharIdx < paragraphs[idx].length && (
-            <span className="inline-block w-1.5 h-4 bg-pink-500 ml-1 animate-pulse" />
+            <span className={`inline-block w-1.5 h-4 ml-1 animate-pulse ${styleType === "luxury" ? "bg-pink-300" : "bg-pink-500"}`} />
           )}
         </p>
       ))}
@@ -258,23 +263,8 @@ export default function LetterViewer({
                     </div>
                   )}
 
-                  {/* Letter content text rendering */}
-                  {letter.styleType === "mist" ? (
-                    <Typist paragraphs={letter.content} />
-                  ) : (
-                    <div className="flex flex-col gap-4 text-left">
-                      {letter.content.map((p, idx) => (
-                        <p
-                          key={idx}
-                          className={`text-base md:text-lg leading-relaxed font-medium ${
-                            letter.styleType === "luxury" ? "text-pink-100/90" : "text-slate-700"
-                          }`}
-                        >
-                          {p}
-                        </p>
-                      ))}
-                    </div>
-                  )}
+                  {/* Letter content text rendering with universal Typist */}
+                  <Typist paragraphs={letter.content} styleType={letter.styleType} />
                 </div>
 
                 {/* Footer Signoff */}

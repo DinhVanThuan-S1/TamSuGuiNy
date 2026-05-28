@@ -149,9 +149,7 @@ export default function PasswordModal({
                   </motion.p>
                 )}
 
-                <p className="text-[10px] font-semibold text-slate-400 italic">
-                  *Gợi ý: Mật mã liên quan đến tụi mình (Ví dụ: onlyus, forever)
-                </p>
+
 
                 <motion.button
                   whileHover={{ scale: 1.03 }}
