@@ -82,11 +82,10 @@ export const lettersData: Letter[] = [
     title: "Bí mật 1",
     date: "25/05/2026",
     mood: "Nhỏ bé 🎁",
-    iconName: "Lock",
+    iconName: "Camera",
     styleType: "polaroid",
-    isLocked: true,
-    password: "onlyus",
-    summary: "Góc nhỏ bí mật nói về sự sẻ chia và chăm sóc lẫn nhau. Nhập mật mã để mở khóa nhé...",
+    isLocked: false,
+    summary: "Góc nhỏ bí mật nói về sự sẻ chia và chăm sóc lẫn nhau.",
     content: [
       "Chuyện tiền bạc hay quà cáp thì anh muốn nói rõ là anh chưa bao giờ tiếc với em cả. Anh thích dẫn em đi ăn, đi chơi, mua quà cho em vì anh thương em nên anh tự nguyện làm thôi. Nhưng thật lòng anh cũng mong em cho anh thấy là em cũng có ý muốn share cùng anh một chút. Không cần phải món quà gì lớn hay phải trả tiền lại cho anh đâu, chỉ cần đôi khi em chủ động mua cho anh ly nước, một món nhỏ nhỏ, hay đơn giản là nói “để hôm nay em trả cho” thôi cũng đủ để anh cảm thấy mình được em để tâm rồi."
     ]
@@ -96,11 +95,10 @@ export const lettersData: Letter[] = [
     title: "Bí mật 2",
     date: "25/05/2026",
     mood: "Gần gũi 🫂",
-    iconName: "Lock",
+    iconName: "Heart",
     styleType: "mist",
-    isLocked: true,
-    password: "forever",
-    summary: "Những tâm sự thầm kín về sự gần gũi trong tình yêu. Nhập mật mã để mở khóa nhé...",
+    isLocked: false,
+    summary: "Những tâm sự thầm kín về sự gần gũi trong tình yêu.",
     content: [
       "Rồi chuyện thân mật nữa. Nhiều lúc anh cảm giác em vẫn chưa thật sự xem tụi mình là người yêu theo kiểu gần gũi với nhau. Hầu như mọi thứ đều do anh chủ động trước, từ nắm tay, ôm, đến những hành động tình cảm khác. Có những lúc em còn từ chối nên anh cũng hơi chạnh lòng. Anh hiểu em cần thời gian và anh luôn tôn trọng cảm xúc của em, nhưng vì anh yêu em nhiều nên đôi khi anh cũng muốn được em chủ động lại một chút để anh cảm thấy mình được yêu thật sự."
     ]
