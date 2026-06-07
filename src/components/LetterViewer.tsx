@@ -11,10 +11,21 @@ interface LetterViewerProps {
   onClose: () => void;
   playOpenLetter: () => void;
   playHover: () => void;
+  playTick: () => void;
 }
 
 // Subcomponent: Auto-typing text for all letters
-function Typist({ paragraphs, styleType }: { paragraphs: string[]; styleType: string }) {
+function Typist({
+  paragraphs,
+  styleType,
+  playTick,
+  containerRef
+}: {
+  paragraphs: string[];
+  styleType: string;
+  playTick?: () => void;
+  containerRef: React.RefObject<HTMLDivElement | null>;
+}) {
   const [displayText, setDisplayText] = useState<string[]>([]);
   const [currentParagraphIdx, setCurrentParagraphIdx] = useState(0);
   const [currentCharIdx, setCurrentCharIdx] = useState(0);
@@ -31,6 +42,7 @@ function Typist({ paragraphs, styleType }: { paragraphs: string[]; styleType: st
           return next;
         });
         setCurrentCharIdx((prev) => prev + 1);
+        if (playTick) playTick();
       }, 20); // Typing speed
       return () => clearTimeout(timer);
     } else {
@@ -41,23 +53,97 @@ function Typist({ paragraphs, styleType }: { paragraphs: string[]; styleType: st
       }, 500); // Delay between paragraphs
       return () => clearTimeout(timer);
     }
-  }, [currentParagraphIdx, currentCharIdx, paragraphs]);
+  }, [currentParagraphIdx, currentCharIdx, paragraphs, playTick]);
+
+  useEffect(() => {
+    if (containerRef && containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
+  }, [displayText, containerRef]);
 
   return (
     <div className="flex flex-col gap-4 text-left">
       {displayText.map((text, idx) => (
         <p
           key={idx}
-          className={`text-base md:text-lg leading-relaxed font-medium ${
-            styleType === "luxury" ? "text-pink-100/90" : "text-slate-700"
-          }`}
+          className={`text-base md:text-lg leading-relaxed font-medium ${styleType === "luxury" || styleType === "special" ? "text-pink-100/90" : "text-slate-700"
+            }`}
         >
           {text}
           {idx === currentParagraphIdx && currentCharIdx < paragraphs[idx].length && (
-            <span className={`inline-block w-1.5 h-4 ml-1 animate-pulse ${styleType === "luxury" ? "bg-pink-300" : "bg-pink-500"}`} />
+            <span className={`inline-block w-1.5 h-4 ml-1 animate-pulse ${styleType === "luxury" || styleType === "special" ? "bg-pink-300" : "bg-pink-500"}`} />
           )}
         </p>
       ))}
+    </div>
+  );
+}
+
+// Subcomponent: Special ambient floating effects for letter 10
+function SpecialEffects() {
+  const [particles, setParticles] = useState<{ id: number; x: number; size: number; delay: number; duration: number; type: "heart" | "sparkle" | "star"; color: string }[]>([]);
+
+  useEffect(() => {
+    const types: ("heart" | "sparkle" | "star")[] = ["heart", "sparkle", "star"];
+    const colors = [
+      "text-pink-400",
+      "text-rose-400",
+      "text-pink-300",
+      "text-amber-300",
+      "text-purple-300",
+      "text-red-400"
+    ];
+    const items = Array.from({ length: 32 }).map((_, i) => ({
+      id: i,
+      x: Math.random() * 92 + 2,
+      size: Math.random() * 12 + 10,
+      delay: Math.random() * 4,
+      duration: Math.random() * 5 + 5,
+      type: types[i % types.length],
+      color: colors[Math.floor(Math.random() * colors.length)]
+    }));
+    setParticles(items);
+  }, []);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 select-none">
+      {/* Soft moving color gradient background spots */}
+      <div className="absolute top-1/4 left-1/4 w-44 h-44 rounded-full bg-pink-500/10 blur-3xl animate-pulse" />
+      <div className="absolute bottom-1/4 right-1/4 w-52 h-52 rounded-full bg-purple-500/10 blur-3xl animate-pulse" style={{ animationDelay: "2s" }} />
+      <div className="absolute top-1/2 right-10 w-40 h-40 rounded-full bg-amber-500/5 blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
+
+      {particles.map((p) => {
+        let char = "❤️";
+        if (p.type === "sparkle") char = "✨";
+        if (p.type === "star") char = "✦";
+
+        return (
+          <motion.div
+            key={p.id}
+            initial={{ y: "110%", x: `${p.x}%`, opacity: 0, scale: 0.5, rotate: 0 }}
+            animate={{
+              y: "-10%",
+              x: [`${p.x}%`, `${p.x + (Math.random() * 16 - 8)}%`, `${p.x}%`],
+              opacity: [0, 0.8, 0.8, 0],
+              scale: [0.5, 1, 1.25, 0.6],
+              rotate: [0, 180, 360]
+            }}
+            transition={{
+              duration: p.duration,
+              delay: p.delay,
+              repeat: Infinity,
+              ease: "easeInOut"
+            }}
+            style={{
+              position: "absolute",
+              fontSize: p.size,
+            }}
+            className={`${p.color} filter drop-shadow-[0_0_6px_rgba(244,63,94,0.35)]`}
+          >
+            {char}
+          </motion.div>
+        );
+      })}
     </div>
   );
 }
@@ -67,17 +153,19 @@ export default function LetterViewer({
   isOpen,
   onClose,
   playOpenLetter,
-  playHover
+  playHover,
+  playTick
 }: LetterViewerProps) {
   const [isEnvelopeOpened, setIsEnvelopeOpened] = useState(false);
   const [showLetterSheet, setShowLetterSheet] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const contentAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen && letter) {
       setIsEnvelopeOpened(false);
       setShowLetterSheet(false);
-      
+
       // Step-by-step envelope opening sequence
       const t1 = setTimeout(() => {
         playOpenLetter();
@@ -100,6 +188,8 @@ export default function LetterViewer({
   // Custom themed styling helper for the letter contents page
   const getContentStyle = () => {
     switch (letter.styleType) {
+      case "special":
+        return "bg-gradient-to-br from-[#1a0b2e] via-[#4d1234] to-[#12071f] text-pink-100 border-pink-500/40 shadow-[0_0_35px_rgba(244,63,94,0.5)]";
       case "luxury":
         return "bg-gradient-to-br from-rose-950 via-pink-950 to-rose-900 text-pink-100 border-rose-700/60 box-glow-rose";
       case "rain":
@@ -133,7 +223,7 @@ export default function LetterViewer({
 
           {/* Letter Opening Sequence Container */}
           <div ref={containerRef} className="relative w-full max-w-2xl min-h-[450px] flex items-center justify-center my-8 z-10">
-            
+
             {/* Envelope Opening Stage */}
             {!showLetterSheet && (
               <motion.div
@@ -144,7 +234,7 @@ export default function LetterViewer({
               >
                 {/* Envelope Flap Front */}
                 <div className="absolute inset-0 border-t-[120px] border-t-pink-200 border-x-[200px] border-x-transparent border-b-[130px] border-b-pink-300/30 pointer-events-none"></div>
-                
+
                 {/* Envelope Flap Top 3D Animated */}
                 <motion.div
                   initial={{ rotateX: 0 }}
@@ -179,6 +269,10 @@ export default function LetterViewer({
                 className={`w-full rounded-3xl border shadow-2xl p-6 md:p-10 relative overflow-hidden flex flex-col gap-6 select-none ${getContentStyle()}`}
               >
                 {/* Themed Visual Layers */}
+                {letter.styleType === "special" && (
+                  <SpecialEffects />
+                )}
+
                 {letter.styleType === "rain" && (
                   <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-40">
                     <CloudRain className="rain-drop absolute top-5 left-10 text-indigo-400 w-4 h-4" />
@@ -211,16 +305,22 @@ export default function LetterViewer({
                 {/* Header Section */}
                 <div className="flex items-center justify-between border-b border-dashed border-slate-300/30 pb-4 relative z-10">
                   <div className="flex flex-col text-left">
-                    <span className={`text-[10px] font-bold uppercase tracking-widest ${
-                      letter.styleType === "luxury" ? "text-pink-300" : "text-pink-600"
-                    }`}>
-                      Bức thư #{String(letter.id).padStart(2, "0")} • {letter.mood}
+                    <span className={`text-[10px] font-bold uppercase tracking-widest ${letter.styleType === "luxury"
+                      ? "text-pink-300"
+                      : letter.styleType === "special"
+                        ? "text-amber-300 text-glow-gold flex items-center gap-1"
+                        : "text-pink-600"
+                      }`}>
+                      {letter.styleType === "special" && "✨"} Bức thư #{String(letter.id).padStart(2, "0")} • {letter.mood}
                     </span>
-                    <h2 className="font-handwritten text-3xl md:text-4xl font-bold tracking-wide mt-1">
+                    <h2 className={`font-handwritten text-3xl md:text-4xl font-bold tracking-wide mt-1 ${letter.styleType === "special"
+                      ? "text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-rose-300 to-amber-300 text-glow"
+                      : ""
+                      }`}>
                       {letter.title}
                     </h2>
                   </div>
-                  
+
                   {/* Small Close Top Right */}
                   <button
                     onClick={onClose}
@@ -238,7 +338,7 @@ export default function LetterViewer({
                 </div>
 
                 {/* Main Content Area */}
-                <div className="max-h-[50vh] overflow-y-auto pr-2 relative z-10 custom-scrollbar">
+                <div ref={contentAreaRef} className="max-h-[50vh] overflow-y-auto pr-2 relative z-10 custom-scrollbar">
                   {/* Polaroid Memory Layout for Letter 6 */}
                   {letter.styleType === "polaroid" && (
                     <div className="grid grid-cols-2 gap-4 mb-6">
@@ -264,14 +364,25 @@ export default function LetterViewer({
                   )}
 
                   {/* Letter content text rendering with universal Typist */}
-                  <Typist paragraphs={letter.content} styleType={letter.styleType} />
+                  <Typist
+                    paragraphs={letter.content}
+                    styleType={letter.styleType}
+                    playTick={playTick}
+                    containerRef={contentAreaRef}
+                  />
                 </div>
 
                 {/* Footer Signoff */}
                 <div className="flex flex-col items-center gap-4 border-t border-dashed border-slate-300/30 pt-6 mt-2 relative z-10">
                   <div className="flex items-center gap-2">
-                    <Heart className="w-5 h-5 text-rose-500 fill-rose-500 animate-heart-pulse" />
-                    <span className="font-handwritten text-xl font-bold">Thương em thật nhiều 💗</span>
+                    <Heart className={`w-5 h-5 animate-heart-pulse ${letter.styleType === "special"
+                      ? "text-pink-400 fill-pink-400 filter drop-shadow-[0_0_8px_rgba(244,63,94,0.6)]"
+                      : "text-rose-500 fill-rose-500"
+                      }`} />
+                    <span className={`font-handwritten text-xl font-bold ${letter.styleType === "special" ? "text-pink-200" : ""
+                      }`}>
+                      Thương công chúaa thật nhiềuuuu 💗
+                    </span>
                   </div>
 
                   <motion.button
@@ -279,7 +390,10 @@ export default function LetterViewer({
                     whileTap={{ scale: 0.95 }}
                     onMouseEnter={playHover}
                     onClick={onClose}
-                    className="px-6 py-2.5 bg-gradient-to-r from-pink-500 to-rose-400 text-white rounded-full font-bold shadow-md shadow-pink-200 hover:from-pink-600 hover:to-rose-500 cursor-pointer text-sm"
+                    className={`px-6 py-2.5 rounded-full font-bold shadow-md cursor-pointer text-sm ${letter.styleType === "special"
+                      ? "bg-gradient-to-r from-pink-500 via-rose-500 to-amber-400 text-white shadow-pink-900/40 hover:from-pink-600 hover:to-amber-500"
+                      : "bg-gradient-to-r from-pink-500 to-rose-400 text-white shadow-pink-200 hover:from-pink-600 hover:to-rose-500"
+                      }`}
                   >
                     Đóng thư lại
                   </motion.button>

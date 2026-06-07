@@ -26,6 +26,8 @@ export default function LetterCard({
   // Visual theme class helper
   const getThemeClasses = () => {
     switch (letter.styleType) {
+      case "special":
+        return "bg-gradient-to-tr from-[#ff4d6d] via-[#ff758f] to-[#ffb3c1] text-white border-pink-300 shadow-[0_0_20px_rgba(255,77,109,0.5)] font-semibold";
       case "luxury":
         return "bg-gradient-to-tr from-rose-900/90 to-pink-800/90 text-pink-100 border-rose-700 box-glow-rose";
       case "rain":
@@ -64,6 +66,8 @@ export default function LetterCard({
             className={`text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full ${
               letter.styleType === "luxury"
                 ? "bg-pink-700/50 text-pink-200 border border-pink-600/30"
+                : letter.styleType === "special"
+                ? "bg-white/20 text-white border border-white/30"
                 : "bg-white/80 text-pink-600 border border-pink-100"
             }`}
           >
@@ -73,8 +77,12 @@ export default function LetterCard({
           {/* Dynamic Emotional Icon / Locked State */}
           <div className="flex items-center gap-1.5">
             {isRead && (
-              <span className="text-[10px] font-bold text-pink-500/80 bg-pink-50/80 px-2 py-0.5 rounded border border-pink-100/40 flex items-center gap-0.5">
-                <Heart className="w-2.5 h-2.5 fill-pink-400 text-pink-400" />
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded border flex items-center gap-0.5 ${
+                letter.styleType === "special"
+                  ? "text-white bg-white/20 border-white/30"
+                  : "text-pink-500/80 bg-pink-50/80 border-pink-100/40"
+              }`}>
+                <Heart className="w-2.5 h-2.5 fill-current" />
                 ĐÃ ĐỌC
               </span>
             )}
@@ -82,6 +90,8 @@ export default function LetterCard({
               className={`w-8 h-8 rounded-full flex items-center justify-center border ${
                 letter.styleType === "luxury"
                   ? "bg-rose-950/40 border-rose-700 text-pink-300"
+                  : letter.styleType === "special"
+                  ? "bg-white/20 border-white/30 text-white"
                   : "bg-white/80 border-pink-100 text-pink-500"
               }`}
             >
@@ -99,6 +109,8 @@ export default function LetterCard({
           className={`text-lg font-bold mb-2 group-hover:text-pink-600 transition-colors leading-snug ${
             letter.styleType === "luxury"
               ? "group-hover:text-pink-300 text-pink-100"
+              : letter.styleType === "special"
+              ? "group-hover:text-pink-100 text-white"
               : "text-slate-800"
           }`}
         >
@@ -108,7 +120,11 @@ export default function LetterCard({
         {/* Short Summary */}
         <p
           className={`text-xs leading-relaxed line-clamp-2 ${
-            letter.styleType === "luxury" ? "text-pink-200/70" : "text-slate-500"
+            letter.styleType === "luxury"
+              ? "text-pink-200/70"
+              : letter.styleType === "special"
+              ? "text-white/80"
+              : "text-slate-500"
           }`}
         >
           {letter.isLocked && !isUnlocked
@@ -130,7 +146,9 @@ export default function LetterCard({
 
       {/* Closed Envelope Overlay visual effect on hover */}
       <div className="absolute inset-0 bg-pink-500/5 backdrop-blur-[0.5px] opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center pointer-events-none">
-        <Mail className="w-8 h-8 text-pink-400/30 scale-75 group-hover:scale-100 transition-transform duration-300" />
+        <Mail className={`w-8 h-8 scale-75 group-hover:scale-100 transition-transform duration-300 ${
+          letter.styleType === "special" ? "text-white/40" : "text-pink-400/30"
+        }`} />
       </div>
     </motion.div>
   );

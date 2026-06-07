@@ -125,6 +125,14 @@ export default function Home() {
             onComplete={() => {
               setShowPreloader(false);
               audio.playBackground();
+              
+              // Automatically open the 10th special letter immediately
+              const letter10 = lettersData.find((l) => l.id === 10);
+              if (letter10) {
+                setSelectedLetter(letter10);
+                setIsViewerOpen(true);
+                markAsRead(letter10.id);
+              }
             }}
             playHover={audio.playHover}
             playSuccess={audio.playSuccess}
@@ -212,6 +220,7 @@ export default function Home() {
             }}
             playOpenLetter={audio.playOpenLetter}
             playHover={audio.playHover}
+            playTick={audio.playTick}
           />
 
           {/* Unlocking password popup screen */}
